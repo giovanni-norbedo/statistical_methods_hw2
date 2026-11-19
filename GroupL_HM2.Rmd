@@ -44,7 +44,6 @@ the maximum of log(f(x)), so we know that if we maximize log-likelhood we
 also maximize the likelyhood. 
 
 
-### Ex 4.4
 ### Ex 4.4 (Viola Reschiotto)
 For the Students data file (Exercise 1.2 in Chapter 1) and the corresponding population, find the maximum likelihood (ML) estimate of the population proportion believing in life after death. Construct a Wald 95% confidence interval using formula (4.8). Interpret the results.
 
@@ -113,7 +112,7 @@ The point estimate of the difference is $\hat{\pi}_1 - \hat{\pi}_2 = 0.54$, with
 
 ### Ex 4.39
 
-### (a) Log-likelihood function
+#### (a) Log-likelihood function
 
 For $n$ independent observations from an exponential distribution, the likelihood is
 
@@ -129,7 +128,7 @@ L(\lambda) = n\log(\lambda) - \lambda\sum_{i=1}^{n}y_i
 = n(\log(\lambda) - \lambda\bar{y}).
 $$
 
-### (b) Maximum likelihood estimator
+#### (b) Maximum likelihood estimator
 
 Differentiating with respect to $\lambda$:
 
@@ -152,7 +151,7 @@ $$
 Therefore, the log-likelihood is strictly concave, and
 $\hat{\lambda} = 1/\bar{y}$ is its global maximizer.
 
-### (c) Log-likelihood plots
+#### (c) Log-likelihood plots
 
 For $\bar{y} = 10$, we have $\hat{\lambda} = 0.1$.
 
@@ -187,7 +186,7 @@ increase the number of observations, we get tighter and tigher (normally and
 symmetrically) around the true value. The variance decreases linearly as $n$
 increases.
 
-### (d) Fisher Information
+#### (d) Fisher Information
 
 The score function is
 
@@ -229,13 +228,12 @@ N\left(\lambda,\frac{\lambda^2}{n}\right).
 $$
 This is why the variance is observed to shrink in part (c) as we increase $n$.
 
-### Ex 4.44
 ### Ex 4.44 (Viola Reschiotto)
 Refer to the previous two exercises. Consider the selling prices (in thousands of dollars) in the Houses data file mentioned in Exercise 4.31.
 
-a) Fit the normal distribution to the data by finding the ML estimates of μ and σ for that distribution.
+a) Fit the normal distribution to the data by finding the ML estimates of $\mu$ and $\sigma$ for that distribution.
 
-a) Fit the log-normal distribution to the data by finding the ML estimates of its parameters.
+b) Fit the log-normal distribution to the data by finding the ML estimates of its parameters.
 
 c) Find and compare the ML estimates of the mean and standard deviation of selling price for the two distributions.
 
@@ -243,7 +241,7 @@ d) Superimpose the fitted normal and log-normal distributions on a histogram of 
 
 **Solution** 
 
-```{r, echo=TRUE
+```{r, echo=TRUE}
 # Load Houses dataset
 Houses <- read.table(
   "https://stat4ds.rwth-aachen.de/data/Houses.dat",
@@ -257,9 +255,11 @@ price <- Houses$price
 n <- length(price)
 
 n
+```
 
-a)  Fit the normal distribution
+a) Fit the normal distribution
 
+```{r, echo=TRUE}
 # ML estimates for the normal distribution
 mu_hat <- mean(price)
 
@@ -270,9 +270,11 @@ sigma_hat <- sqrt(
 # Display results
 mu_hat
 sigma_hat
+```
 
-b)  Fit the log-normal distribution
+b) Fit the log-normal distribution
 
+```{r, echo=TRUE}
 # Logarithm of selling prices
 log_price <- log(price)
 
@@ -286,8 +288,9 @@ sigma_log_hat <- sqrt(
 # Display results
 mu_log_hat
 sigma_log_hat
+```
 
-c)  Compare the ML estimates of the mean and standard deviation
+c) Compare the ML estimates of the mean and standard deviation
 
 For the normal distribution, the estimated mean and standard deviation are:
 
@@ -301,15 +304,18 @@ $$
 
 For the log-normal distribution, the estimated mean and standard deviation are:
 
-e^{\widehat{\mu}{log}+\widehat{\sigma}{log}^{2}/2}
+$$
+e^{\widehat{\mu}_{\text{log}}+\widehat{\sigma}_{\text{log}}^{2}/2}
 $$
 
+$$
 \sqrt{
-(e^{\widehat{\sigma}{log}^{2}}-1)
-e^{2\widehat{\mu}{log}+\widehat{\sigma}_{log}^{2}}
+(e^{\widehat{\sigma}_{\text{log}}^{2}}-1)
+e^{2\widehat{\mu}_{\text{log}}+\widehat{\sigma}_{\text{log}}^{2}}
 }
 $$
 
+```{r, echo=TRUE}
 # Mean and standard deviation for the normal distribution
 mean_normal <- mu_hat
 sd_normal <- sigma_hat
@@ -331,10 +337,13 @@ comparison <- data.frame(
   Standard_Deviation = c(sd_normal, sd_lognormal)
 )
 
-round(comparison, 2)
+comparison[, 2:3] <- round(comparison[, 2:3], 2)
+comparison
+```
 
-d)  Plot the fitted distributions on a histogram
+d) Plot the fitted distributions on a histogram
 
+```{r, echo=TRUE}
 # Histogram of selling prices
 hist(
   price,
@@ -442,22 +451,6 @@ The score CI performs better because it uses the variance $\mu_0/n$ implied by e
 a) 
 ```{r}
 students <- read.table(
-### Ex 6.11 (Viola Reschiotto)
-Refer to the model fitted in the previous exercise to predict college GPA.
-
-a) Test (H_0:\beta_1=\beta_2=\beta_3=0). Report the P-value and interpret.
-
-b) Show how to conduct a significance test about the individual effect of hsgpa, adjusting for tv and sport, using (\alpha=0.05). Interpret.
-
-c) Is the effect in (b) significant at the (\alpha=0.05) level if we use the Bonferroni approach to test the family of three individual effects? Explain.
-
-d) Are the effects of tv and sport significant? Propose an alternative model.
-
-**Solution**
-
-```{r, echo=TRUE}
-# Load Students dataset
-Students <- read.table(
   "https://stat4ds.rwth-aachen.de/data/Students.dat",
   header = TRUE
 )
@@ -495,14 +488,32 @@ The R^2 and adjusted R^2 values here tell us that most of the variance in our da
 from the square root of our R^2 value which comes out to be about 0.32. This means that
 the correlation between the true GPA values and the ones we predicted is about a third.
 
+### Ex 6.11 (Viola Reschiotto)
+Refer to the model fitted in the previous exercise to predict college GPA.
 
+a) Test $H_0:\beta_1=\beta_2=\beta_3=0$. Report the P-value and interpret.
 
-### Ex 6.11
+b) Show how to conduct a significance test about the individual effect of hsgpa, adjusting for tv and sport, using $\alpha=0.05$. Interpret.
+
+c) Is the effect in (b) significant at the $\alpha=0.05$ level if we use the Bonferroni approach to test the family of three individual effects? Explain.
+
+d) Are the effects of tv and sport significant? Propose an alternative model.
+
+**Solution**
+
+```{r, echo=TRUE}
+# Load Students dataset
+Students <- read.table(
+  "https://stat4ds.rwth-aachen.de/data/Students.dat",
+  header = TRUE
+)
+
 # Fit the multiple linear regression model
 model <- lm(cogpa ~ hsgpa + tv + sport, data = Students)
 
 # Display model summary
 summary(model)
+```
 
 a) Test the overall significance of the model
 
@@ -514,6 +525,7 @@ $$
 H_1:\text{At least one coefficient is different from zero}
 $$
 
+```{r, echo=TRUE}
 # Calculate the overall F-statistic
 F_stat <- summary(model)$fstatistic
 
@@ -528,6 +540,7 @@ p_overall <- pf(
 # Display results
 F_stat
 p_overall
+```
 
 b) Test the individual effect of hsgpa
 
@@ -540,8 +553,9 @@ $$
 $$
 H_1:\beta_1\neq 0
 $$
-We use a significance level of (\alpha=0.05).
+We use a significance level of $\alpha=0.05$.
 
+```{r, echo=TRUE}
 # Display the coefficient estimates and t-test results
 summary(model)$coefficients["hsgpa", ]
 
@@ -552,6 +566,7 @@ p_hsgpa <- summary(model)$coefficients[
 
 # Decision at alpha = 0.05
 p_hsgpa < 0.05
+```
 
 c) Bonferroni correction
 
@@ -561,6 +576,7 @@ $$
 \alpha^*=\frac{0.05}{3}=0.0167
 $$
 
+```{r, echo=TRUE}
 # Significance level
 alpha <- 0.05
 
@@ -581,10 +597,13 @@ p_adjusted
 
 # Check whether hsgpa is significant after Bonferroni correction
 p_adjusted["hsgpa"] < alpha
+```
 
 d) Test the effects of tv and sport and propose an alternative model
 
 We examine the individual p-values of tv and sport. We then fit a simpler model including only hsgpa and compare it with the original model.
+
+```{r, echo=TRUE}
 # Display p-values for tv and sport
 p_values[c("tv", "sport")]
 
@@ -627,6 +646,13 @@ a) Quadratic regression
 
 We simulate 100 independent observations from the specified model.
 
+```{r}
+set.seed(123)
+x <- runif(100, 0, 10)
+y <- 40 - 5 * x + 0.5 * x^2 + rnorm(100, mean = 0, sd = 1)
+model_quad <- lm(y ~ x + I(x^2))
+```
+
 The fitted equation looks very good and ends up being:
 
 $y = 0.496x^2 -4.910x + 39.606$
@@ -664,7 +690,6 @@ positive and negative contributions to the variance will almost cancel out. The 
 
 
 
-### Ex 6.52
 ### Ex 6.52 (Viola Reschiotto)
 
 a) F-statistic for testing the overall significance of the model
@@ -719,6 +744,7 @@ As \(R^2\) increases, the numerator increases while the denominator decreases. T
 b) F-statistic for comparing nested linear models
 
 Consider two nested linear models fitted to the same dataset:
+
 - Model 0 is the reduced model, with \(p_0\) predictors.
 - Model 1 is the full model, with \(p_1\) predictors, where \(p_1>p_0\).
 The full model includes all the predictors of the reduced model, plus additional predictors.

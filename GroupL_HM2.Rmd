@@ -16,6 +16,35 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Ex 4.3
 
+The binomial likelihood function is:
+
+$$
+\ell(\pi) = \binom{10}{6}\pi^6(1-\pi)^4
+$$
+
+Taking the logarithm gives:
+
+$$
+L(\pi) = \log\binom{10}{6} + 6\log(\pi) + 4\log(1-\pi)
+$$
+
+```{r}
+pi <- seq(0.001, 0.999, length.out = 1000)
+L <- dbinom(6, size = 10, prob = pi, log = TRUE)
+
+plot(pi, L, type = "l", col = "blue",
+     xlab = "pi", ylab = "Log-Likelihood")
+
+abline(v = 0.6, col = "red", lty = 2)
+```
+
+The maximum occurs at $\hat{\pi} = 0.6$. A log-transform preserves ordering because
+it's monotone increasing. Specifically, the maximum of any positive function f(x) is also
+the maximum of log(f(x)), so we know that if we maximize log-likelhood we
+also maximize the likelyhood. 
+
+
+### Ex 4.4
 ### Ex 4.4 (Viola Reschiotto)
 For the Students data file (Exercise 1.2 in Chapter 1) and the corresponding population, find the maximum likelihood (ML) estimate of the population proportion believing in life after death. Construct a Wald 95% confidence interval using formula (4.8). Interpret the results.
 
@@ -84,6 +113,123 @@ The point estimate of the difference is $\hat{\pi}_1 - \hat{\pi}_2 = 0.54$, with
 
 ### Ex 4.39
 
+### (a) Log-likelihood function
+
+For $n$ independent observations from an exponential distribution, the likelihood is
+
+$$
+\ell(\lambda) = \prod_{i=1}^{n} \lambda e^{-\lambda y_i}
+= \lambda^n e^{-\lambda \sum_{i=1}^{n} y_i}.
+$$
+
+Taking the logarithm, we obtain
+
+$$
+L(\lambda) = n\log(\lambda) - \lambda\sum_{i=1}^{n}y_i
+= n(\log(\lambda) - \lambda\bar{y}).
+$$
+
+### (b) Maximum likelihood estimator
+
+Differentiating with respect to $\lambda$:
+
+$$
+L'(\lambda) = \frac{n}{\lambda} - n\bar{y}.
+$$
+
+Setting the derivative equal to zero gives
+
+$$
+\hat{\lambda} = \frac{1}{\bar{y}}.
+$$
+
+To verify that this is a maximum, we compute the second derivative:
+
+$$
+L''(\lambda) = -\frac{n}{\lambda^2} < 0.
+$$
+
+Therefore, the log-likelihood is strictly concave, and
+$\hat{\lambda} = 1/\bar{y}$ is its global maximizer.
+
+### (c) Log-likelihood plots
+
+For $\bar{y} = 10$, we have $\hat{\lambda} = 0.1$.
+
+```{r}
+lambda <- seq(0.01, 4, length.out = 1000)
+lambda_hat <- 0.1
+y_bar <- 10
+
+plot_ll <- function(n) {
+  L <- n * (log(lambda) - lambda * y_bar)
+  L_hat <- n * (log(lambda_hat) - lambda_hat * y_bar)
+
+  plot(lambda, L - L_hat, type = "l",
+       col = "blue", lwd = 2,
+       xlab = expression(lambda),
+       ylab = expression(L(lambda) - L(hat(lambda))),
+       main = paste("n =", n))
+
+  abline(v = lambda_hat, col = "red", lty = 2)
+}
+
+par(mfrow = c(1, 3))
+plot_ll(1)
+plot_ll(5)
+plot_ll(10)
+par(mfrow = c(1, 1))
+```
+
+We have from a result in class that the MLE estimator is asymptotically normally
+distributed around the true parameter. So when we hold the parameter fixed and 
+increase the number of observations, we get tighter and tigher (normally and
+symmetrically) around the true value. The variance decreases linearly as $n$
+increases.
+
+### (d) Fisher Information
+
+The score function is
+
+$$
+L'(\lambda) = \frac{n}{\lambda} - \sum_{i=1}^{n}y_i.
+$$
+
+Using the negative expected second derivative:
+
+$$
+I_n(\lambda)
+= -E[L''(\lambda)]
+= -E\left[-\frac{n}{\lambda^2}\right]
+= \frac{n}{\lambda^2}.
+$$
+
+Alternatively, using the variance of the score:
+
+$$
+I_n(\lambda)
+= E[(L'(\lambda))^2]
+= \operatorname{Var}\left(\frac{n}{\lambda} - \sum_{i=1}^{n}Y_i\right).
+$$
+
+Since the observations are independent and
+$\operatorname{Var}(Y_i)=1/\lambda^2$,
+
+$$
+I_n(\lambda)
+= \sum_{i=1}^{n}\operatorname{Var}(Y_i)
+= \frac{n}{\lambda^2}.
+$$
+
+Therefore, the asymptotic distribution of the MLE is
+
+$$
+\hat{\lambda} \overset{\cdot}{\sim}
+N\left(\lambda,\frac{\lambda^2}{n}\right).
+$$
+This is why the variance is observed to shrink in part (c) as we increase $n$.
+
+### Ex 4.44
 ### Ex 4.44 (Viola Reschiotto)
 Refer to the previous two exercises. Consider the selling prices (in thousands of dollars) in the Houses data file mentioned in Exercise 4.31.
 
@@ -293,6 +439,9 @@ The score CI performs better because it uses the variance $\mu_0/n$ implied by e
 
 ### Ex 6.10
 
+a) 
+```{r}
+students <- read.table(
 ### Ex 6.11 (Viola Reschiotto)
 Refer to the model fitted in the previous exercise to predict college GPA.
 
@@ -313,6 +462,42 @@ Students <- read.table(
   header = TRUE
 )
 
+model <- lm(cogpa ~ hsgpa + tv + sport, data = students)
+summary(model)
+```
+
+We model College GPA as predicted by High School GPA, hours of TV/week, hours of sport/week
+From the model summary, the equation is approximately:
+
+$$y = 0.209(hsgpa) + 0.003(tv) - 0.014(sport) + 2.815$$
+The p-values in the model summary test against the null hypothesis that
+the coefficient is zero (or that this covariate doesn't effect the response). Here
+we can see pretty clearly that tv and sport don't have a statistically significant
+effect on the prediction of the college GPA. The p-values here mean that if we assume 
+these coefficients to be zero (null hypothesis), then we might observe these
+values at least this high just from randomness in the linear model ~63% and ~23% of the time,
+which means that we can't really claim there is a strong and statistically significant
+linear relationship between these covariates and the predictor. High School GPA on the other hand
+is significant (although not strongly) and unlikely to actually be zero. This p-value
+is conditioned however on the prescense of the other two covariates, and so it might
+become more signifigant if we remove them.
+
+b) 
+
+The estimated effect of $hsgpa$ (High School GPA) is 0.209, which means that 
+per unit increase in high school GPA, we expect a 0.209 positive increase in
+college GPA.
+
+c) 
+
+The R^2 and adjusted R^2 values here tell us that most of the variance in our data
+(~90-95%) is still unexplained by our predictors. Multiple correlation we can find
+from the square root of our R^2 value which comes out to be about 0.32. This means that
+the correlation between the true GPA values and the ones we predicted is about a third.
+
+
+
+### Ex 6.11
 # Fit the multiple linear regression model
 model <- lm(cogpa ~ hsgpa + tv + sport, data = Students)
 
@@ -438,6 +623,48 @@ In the bivariate model, the estimated `GDP` slope is $\hat{\beta}_{\text{GDP}} =
 
 ### Ex 6.42
 
+a) Quadratic regression
+
+We simulate 100 independent observations from the specified model.
+
+The fitted equation looks very good and ends up being:
+
+$y = 0.496x^2 -4.910x + 39.606$
+ 
+compared to $y = 0.5x^2 -0.5x + 40$ (plus noise)
+
+b) 
+
+```{r}
+# Correlation between X and Y
+cor(x, y)
+
+# Scatterplot with a linear regression line
+plot(x, y, pch = 19, col = "gray40",
+     xlab = "X", ylab = "Y",
+     main = "Linear Correlation vs Quadratic Relationship")
+
+abline(lm(y ~ x), col = "red", lwd = 2)
+
+# Quadratic regression curve
+curve(predict(model_quad, newdata = data.frame(x = x)),
+      add = TRUE, col = "blue", lwd = 2)
+
+legend("topright",
+       legend = c("Linear fit", "Quadratic fit"),
+       col = c("red", "blue"), lwd = 2)
+
+```
+
+The correlation coefficient comes from the covariance structure of our data and estimators,
+which quantifies the linear relationship between x and y here. There is no linear relationship between
+x and y, and in fact the covavariance will likely be near zero because this parabola is symmetric, so
+positive and negative contributions to the variance will almost cancel out. The model minimizes mean square error well and so results a nicely fitted curve, but the correlation will be near zero (and thus an almost horizontal line) because there isn't any real linear relationship here to be observed by that statistic.
+
+
+
+
+### Ex 6.52
 ### Ex 6.52 (Viola Reschiotto)
 
 a) F-statistic for testing the overall significance of the model
